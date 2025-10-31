@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Крестики-нолики</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .container {
+            text-align: center;
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        .player-info {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 1.5rem;
+            gap: 2rem;
+        }
+
+        .player {
+            padding: 0.5rem 1.5rem;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .player.x {
+            color: #e74c3c;
+            border: 3px solid transparent;
+        }
+
+        .player.o {
+            color: #3498db;
+            border: 3px solid transparent;
+        }
+
+        .player.active {
+            transform: scale(1.1);
+        }
+
+        .player.x.active {
+            border-color: #e74c3c;
+            background: #ffe5e5;
+        }
+
+        .player.o.active {
+            border-color: #3498db;
+            background: #e5f2ff;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 120px);
+            grid-template-rows: repeat(3, 120px);
+            gap: 10px;
+            margin: 0 auto 1.5rem;
+            background: #ddd;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .cell {
+            background: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 3rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cell:hover:not(.filled) {
+            background: #f0f0f0;
+            transform: scale(1.05);
+        }
+
+        .cell.filled {
+            cursor: not-allowed;
+        }
+
+        .cell.last-move {
+            background: #fff9e6;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+
+        .cell.ghost::before {
+            content: attr(data-ghost);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.3;
+            font-size: 3rem;
+            font-weight: bold;
+            pointer-events: none;
+        }
+
+        .cell.ghost.x::before {
+            color: #e74c3c;
+        }
+
+        .cell.ghost.o::before {
+            color: #3498db;
+        }
+
+        .cell .symbol {
+            animation: draw 0.5s ease-out forwards;
+        }
+
+        .cell .symbol.x {
+            color: #e74c3c;
+        }
+
+        .cell .symbol.o {
+            color: #3498db;
+        }
+
+        @keyframes draw {
+            0% {
+                opacity: 0;
+                transform: scale(0) rotate(0deg);
+            }
+            50% {
+                transform: scale(1.2) rotate(180deg);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) rotate(360deg);
+            }
+        }
+
+        .cell.winner {
+            background: #d4edda !important;
+            animation: pulse 0.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulse {
+            from {
+                transform: scale(1);
+            }
+            to {
+                transform: scale(1.1);
+            }
+        }
+
+        .status {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            min-height: 2rem;
+            font-weight: bold;
+        }
+
+        .status.win {
+            color: #27ae60;
+        }
+
+        .status.draw {
+            color: #f39c12;
+        }
+
+        .reset-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            font-size: 1.1rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .reset-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .reset-btn:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Крестики-нолики</h1>
+
+        <div class="player-info">
+            <div class="player x active" id="player-x">Игрок X</div>
+            <div class="player o" id="player-o">Игрок O</div>
+        </div>
+
+        <div class="board" id="board"></div>
+
+        <div class="status" id="status"></div>
+
+        <button class="reset-btn" id="reset-btn">Новая игра</button>
+    </div>
+
+    <script>
+        class TicTacToe {
+            constructor() {
+                this.board = Array(9).fill(null);
+                this.currentPlayer = 'X'; // X ходят первым
+                this.gameActive = true;
+                this.lastMoveIndex = null;
+
+                this.boardElement = document.getElementById('board');
+                this.statusElement = document.getElementById('status');
+                this.resetBtn = document.getElementById('reset-btn');
+                this.playerX = document.getElementById('player-x');
+                this.playerO = document.getElementById('player-o');
+
+                this.winPatterns = [
+                    [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
+                    [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
+                    [0, 4, 8], [2, 4, 6]             // diagonals
+                ];
+
+                this.init();
+            }
+
+            init() {
+                this.createBoard();
+                this.resetBtn.addEventListener('click', () => this.resetGame());
+            }
+
+            createBoard() {
+                this.boardElement.innerHTML = '';
+                for (let i = 0; i < 9; i++) {
+                    const cell = document.createElement('button');
+                    cell.classList.add('cell');
+                    cell.dataset.index = i;
+
+                    cell.addEventListener('click', () => this.handleCellClick(i));
+                    cell.addEventListener('mouseenter', () => this.handleCellHover(i, true));
+                    cell.addEventListener('mouseleave', () => this.handleCellHover(i, false));
+
+                    this.boardElement.appendChild(cell);
+                }
+            }
+
+            handleCellHover(index, isEntering) {
+                if (!this.gameActive || this.board[index]) return;
+
+                const cell = this.boardElement.children[index];
+
+                if (isEntering) {
+                    cell.classList.add('ghost', this.currentPlayer.toLowerCase());
+                    cell.dataset.ghost = this.currentPlayer;
+                } else {
+                    cell.classList.remove('ghost', 'x', 'o');
+                    delete cell.dataset.ghost;
+                }
+            }
+
+            handleCellClick(index) {
+                if (!this.gameActive || this.board[index]) return;
+
+                // Делаем ход
+                this.board[index] = this.currentPlayer;
+                const cell = this.boardElement.children[index];
+
+                // Убираем ghost при клике
+                cell.classList.remove('ghost');
+                delete cell.dataset.ghost;
+
+                // Добавляем символ с анимацией
+                cell.classList.add('filled');
+                const symbol = document.createElement('span');
+                symbol.classList.add('symbol', this.currentPlayer.toLowerCase());
+                symbol.textContent = this.currentPlayer;
+                cell.appendChild(symbol);
+
+                // Убираем подсветку с предыдущего хода
+                if (this.lastMoveIndex !== null) {
+                    this.boardElement.children[this.lastMoveIndex].classList.remove('last-move');
+                }
+
+                // Подсвечиваем текущий ход как последний
+                cell.classList.add('last-move');
+                this.lastMoveIndex = index;
+
+                // Проверяем победу или ничью
+                if (this.checkWin()) {
+                    this.handleWin();
+                    return;
+                }
+
+                if (this.checkDraw()) {
+                    this.handleDraw();
+                    return;
+                }
+
+                // Меняем игрока
+                this.switchPlayer();
+            }
+
+            checkWin() {
+                return this.winPatterns.some(pattern => {
+                    const [a, b, c] = pattern;
+                    if (this.board[a] &&
+                        this.board[a] === this.board[b] &&
+                        this.board[a] === this.board[c]) {
+                        this.winningPattern = pattern;
+                        return true;
+                    }
+                    return false;
+                });
+            }
+
+            checkDraw() {
+                return this.board.every(cell => cell !== null);
+            }
+
+            handleWin() {
+                this.gameActive = false;
+                this.statusElement.textContent = `Игрок ${this.currentPlayer} победил!`;
+                this.statusElement.classList.add('win');
+
+                // Подсвечиваем выигрышную комбинацию
+                this.winningPattern.forEach(index => {
+                    this.boardElement.children[index].classList.add('winner');
+                });
+            }
+
+            handleDraw() {
+                this.gameActive = false;
+                this.statusElement.textContent = 'Ничья!';
+                this.statusElement.classList.add('draw');
+            }
+
+            switchPlayer() {
+                this.currentPlayer = this.currentPlayer === 'X' ? 'O' : 'X';
+
+                // Обновляем индикатор текущего игрока
+                this.playerX.classList.toggle('active');
+                this.playerO.classList.toggle('active');
+            }
+
+            resetGame() {
+                this.board = Array(9).fill(null);
+                this.currentPlayer = 'X';
+                this.gameActive = true;
+                this.lastMoveIndex = null;
+                this.winningPattern = null;
+
+                this.statusElement.textContent = '';
+                this.statusElement.classList.remove('win', 'draw');
+
+                // Сбрасываем индикатор игроков
+                this.playerX.classList.add('active');
+                this.playerO.classList.remove('active');
+
+                this.createBoard();
+            }
+        }
+
+        // Запускаем игру
+        const game = new TicTacToe();
+    </script>
+</body>
+</html>
