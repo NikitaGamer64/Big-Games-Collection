@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Крестики-нолики</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Крестики-нолики</h1>
+
+        <div class="game-info">
+            <div class="player-info">
+                <div class="player player-x active">
+                    <span class="player-symbol">X</span>
+                    <span class="player-label">Игрок 1</span>
+                </div>
+                <div class="current-turn">
+                    Ход: <span id="current-player">X</span>
+                </div>
+                <div class="player player-o">
+                    <span class="player-symbol">O</span>
+                    <span class="player-label">Игрок 2</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="game-board" class="game-board">
+            <div class="cell" data-index="0"></div>
+            <div class="cell" data-index="1"></div>
+            <div class="cell" data-index="2"></div>
+            <div class="cell" data-index="3"></div>
+            <div class="cell" data-index="4"></div>
+            <div class="cell" data-index="5"></div>
+            <div class="cell" data-index="6"></div>
+            <div class="cell" data-index="7"></div>
+            <div class="cell" data-index="8"></div>
+        </div>
+
+        <div id="game-status" class="game-status"></div>
+
+        <button id="reset-button" class="reset-button">Новая игра</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
