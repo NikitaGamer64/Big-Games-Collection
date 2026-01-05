@@ -1,0 +1,239 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.container {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    max-width: 500px;
+    width: 100%;
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 30px;
+    font-size: 2.5em;
+}
+
+.game-info {
+    margin-bottom: 30px;
+}
+
+.player-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.player {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    opacity: 0.5;
+}
+
+.player.active {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.player-x.active {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.player-o.active {
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.player-symbol {
+    font-size: 2em;
+    font-weight: bold;
+}
+
+.player-x .player-symbol {
+    color: #ef4444;
+}
+
+.player-o .player-symbol {
+    color: #3b82f6;
+}
+
+.player-label {
+    font-size: 0.9em;
+    color: #666;
+}
+
+.current-turn {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #333;
+    text-align: center;
+}
+
+#current-player {
+    color: #667eea;
+}
+
+.game-board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 30px;
+    aspect-ratio: 1;
+}
+
+.cell {
+    background: #f3f4f6;
+    border: 3px solid #e5e7eb;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 3em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.cell:hover:not(.taken) {
+    background: #e5e7eb;
+    transform: scale(1.05);
+}
+
+.cell.taken {
+    cursor: not-allowed;
+}
+
+.cell.last-move {
+    background: #fef3c7;
+    border-color: #fbbf24;
+}
+
+.cell::before {
+    content: attr(data-ghost);
+    position: absolute;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    color: #d1d5db;
+}
+
+.cell:hover:not(.taken)::before {
+    opacity: 1;
+}
+
+.cell.x {
+    color: #ef4444;
+    animation: drawSymbol 0.3s ease forwards;
+}
+
+.cell.o {
+    color: #3b82f6;
+    animation: drawSymbol 0.3s ease forwards;
+}
+
+@keyframes drawSymbol {
+    0% {
+        transform: scale(0) rotate(-180deg);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2) rotate(0deg);
+    }
+    100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+}
+
+.cell.winning {
+    background: #86efac;
+    animation: winPulse 0.6s ease infinite;
+}
+
+@keyframes winPulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.game-status {
+    text-align: center;
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-bottom: 20px;
+    min-height: 40px;
+    color: #333;
+}
+
+.game-status.winner {
+    color: #10b981;
+}
+
+.game-status.draw {
+    color: #f59e0b;
+}
+
+.reset-button {
+    width: 100%;
+    padding: 15px;
+    font-size: 1.1em;
+    font-weight: bold;
+    color: white;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.reset-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.reset-button:active {
+    transform: translateY(0);
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 2em;
+    }
+
+    .cell {
+        font-size: 2em;
+    }
+
+    .player-symbol {
+        font-size: 1.5em;
+    }
+}
